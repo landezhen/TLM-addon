@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# 第三方模组依赖 jar —— 不入库。
+# 车万女仆本体与女仆使用任务是别人的作品，公开仓库里放它们的 jar 属于二次分发，
+# 而且单个 24M 会触发 GitHub 的大文件警告。构建者需自行下载到 libs/，
+# 具体版本见 README。
+libs/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS / misc
+*.log
+*.bak
+.DS_Store
+
+# Forge run dirs
+run/
+runs/
+logs/

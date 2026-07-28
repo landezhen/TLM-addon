@@ -1,0 +1,102 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '1.4.0'
+group = 'com.github.maidmining'
+
+base {
+    archivesName = 'maid_mining_addon-forge'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                maid_mining {
+                    source sourceSets.main
+                }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                maid_mining {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dir 'libs'
+    }
+    maven {
+        name = "TartaricAcid Maven"
+        url = "https://maven.tartaricacid.cn/releases"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+
+    // 车万女仆 (dev/userdev jar, 经 flatDir+classifier 由 ForgeGradle 完整重映射)
+    compileOnly fg.deobf("libs:touhoulittlemaid-1.20.1:all")
+    runtimeOnly fg.deobf("libs:touhoulittlemaid-1.20.1:all")
+    // maid_useful_task 提供的方块破坏框架
+    implementation fg.deobf("libs:maid_useful_task:1.4.2")
+}
+
+// 把 mods.toml 里的 ${mod_version} 占位符替换成 build.gradle 的 version。
+// 之前 mods.toml 硬编码 version = "1.0.0"，跟文件名的版本号脱节——
+// jar 叫 1.4.0，游戏内模组列表却显示 1.0.0。改成占位符后单点维护，不会再漂。
+processResources {
+    def replaceProps = [mod_version: project.version]
+    inputs.properties replaceProps
+    filesMatching(['META-INF/mods.toml']) {
+        expand replaceProps
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "maid_mining_task",
+                "Specification-Vendor"    : "MaidMining",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "MaidMining",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
